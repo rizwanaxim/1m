@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RM1 Million Playbook</title>
+<style>
+/* Layout concept: phone-first single column (plan, then one bold result block, then evidence).
+   From 880px up: inputs stay on the left, results scroll on the right. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#0F211C; --muted:#53665F; --line:#D5DFDA;
+  --accent:#0A6B58; --accent-ink:#FFFFFF; --accent-soft:#DCEEE8;
+  --gold:#8A5600; --gold-soft:#F8EBD0;
+  --font-display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --font-body:'Figtree','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1613; --surface:#14221E; --ink:#E8F1EE; --muted:#9DB2AA; --line:#26382F;
+    --accent:#3FD0AE; --accent-ink:#06211B; --accent-soft:#123A31;
+    --gold:#EDB654; --gold-soft:#34280F; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1613; --surface:#14221E; --ink:#E8F1EE; --muted:#9DB2AA; --line:#26382F;
+  --accent:#3FD0AE; --accent-ink:#06211B; --accent-soft:#123A31;
+  --gold:#EDB654; --gold-soft:#34280F; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font:16px/1.5 var(--font-body);
+  margin:0; padding-block:18px 44px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap{max-width:1040px; margin:0 auto}
+.top{position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; padding:10px 0; margin-bottom:18px; background:var(--bg); border-bottom:1px solid var(--line)}
+.brand{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.lang{display:flex; border:1px solid var(--line); border-radius:999px; background:var(--surface); padding:3px}
+.lang button{
+  font:600 13px var(--font-body); color:var(--muted); background:transparent; border:0;
+  padding:6px 14px; border-radius:999px; cursor:pointer; min-height:32px;
+}
+.lang button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.tools{display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end}
+.eq{font-size:13px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums}
+.income .eq{font-size:15px; margin:4px 0 0}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+h1,.calc-h{
+  font:800 clamp(28px,7.4vw,44px)/1.05 var(--font-display); letter-spacing:-.02em;
+  margin:0 0 8px; text-wrap:balance;
+}
+.sub{color:var(--muted); margin:0 0 22px; max-width:46ch}
+.grid{display:grid; gap:18px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:880px){
+  .grid{grid-template-columns:360px minmax(0,1fr); gap:28px; align-items:start}
+  .plan{position:sticky; top:18px}
+}
+h2{font:700 13px/1.2 var(--font-body); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 12px}
+.plan{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; display:grid; gap:20px; min-width:0}
+.field-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
+.field-head label{font-weight:600; font-size:15px}
+.num{
+  display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:10px;
+  padding:0 10px; background:var(--bg); min-height:40px;
+}
+.num:focus-within{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft)}
+.num .aff{color:var(--muted); font-weight:600; font-size:14px}
+.num input{
+  width:92px; border:0; background:transparent; color:var(--ink); text-align:right;
+  font:700 17px var(--font-body); font-variant-numeric:tabular-nums; padding:6px 0; outline:none;
+  -moz-appearance:textfield;
+}
+.num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+input[type=range]{width:100%; accent-color:var(--accent); height:28px; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.chip{
+  font:600 13px var(--font-body); color:var(--ink); background:var(--bg); border:1px solid var(--line);
+  border-radius:999px; padding:6px 12px; min-height:34px; cursor:pointer; font-variant-numeric:tabular-nums;
+}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.scen{font-size:13px; margin-top:10px; padding:8px 10px; border-radius:10px; background:var(--accent-soft); color:var(--ink)}
+.scen.asp{background:var(--gold-soft); color:var(--gold); font-weight:600}
+.results{display:grid; gap:16px; min-width:0}
+.hero{background:var(--accent); color:var(--accent-ink); border-radius:18px; padding:22px 20px}
+.hero .lead{font-size:14px; font-weight:600; opacity:.88; margin:0 0 4px}
+.hero .time{font:800 clamp(40px,12vw,64px)/1 var(--font-display); letter-spacing:-.03em; font-variant-numeric:tabular-nums}
+.hero .unit{font:600 clamp(15px,4vw,19px) var(--font-body); letter-spacing:0; margin:0 10px 0 4px; opacity:.9}
+.hero .note{margin:10px 0 0; font-size:14px; opacity:.92}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; min-width:0}
+.bar{display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--line); margin:4px 0 12px}
+.bar span{display:block; height:100%}
+.bar .in{background:var(--muted)}
+.bar .gr{background:var(--accent)}
+.legend{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+.legend div{min-width:0}
+.dot{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:baseline}
+.legend .k{font-size:13px; color:var(--muted)}
+.legend .v{font:700 20px var(--font-display); font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.legend .p{font-size:12px; color:var(--muted)}
+.income .big{font:800 clamp(30px,8vw,40px)/1.05 var(--font-display); letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.income .big small{font:600 15px var(--font-body); color:var(--muted); letter-spacing:0}
+.income p{margin:8px 0 0}
+.muted{color:var(--muted); font-size:14px}
+.pair{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:12px 0}
+.pair div{border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0}
+.pair .k{font-size:13px; color:var(--muted)}
+.pair .v{font:700 clamp(17px,5vw,22px) var(--font-display); font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.pair .late{background:var(--gold-soft); border-color:transparent}
+.pair .late .v{color:var(--gold)}
+.gap{font-weight:700; color:var(--gold); margin:0}
+.chartbox svg{display:block; width:100%; height:auto}
+.chartbox .tick{fill:var(--muted); font:11px var(--font-body)}
+.chartbox .grid-l{stroke:var(--line); stroke-width:1}
+.chartbox .l-bal{fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linejoin:round}
+.chartbox .l-in{fill:none; stroke:var(--muted); stroke-width:2; stroke-dasharray:5 4}
+.chartbox .a-bal{fill:var(--accent-soft)}
+.chartbox .l-tg{stroke:var(--gold); stroke-width:1.5; stroke-dasharray:2 4}
+.chartbox .t-tg{fill:var(--gold); font:700 11px var(--font-body)}
+.key{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:8px; font-size:13px; color:var(--muted)}
+.key i{display:inline-block; width:18px; height:0; border-top:3px solid; vertical-align:middle; margin-right:6px}
+.tablewrap{overflow-x:auto; max-height:340px; overflow-y:auto; border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; font-size:14px; font-variant-numeric:tabular-nums; min-width:340px}
+th,td{padding:8px 10px; text-align:right; white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{position:sticky; top:0; background:var(--surface); font-size:12px; color:var(--muted); font-weight:700; border-bottom:1px solid var(--line)}
+tbody tr+tr td{border-top:1px solid var(--line)}
+tbody tr.hit td{background:var(--accent-soft); font-weight:700}
+.disc{border:1px dashed var(--gold); border-radius:14px; padding:14px 16px; font-size:13px; color:var(--muted)}
+.disc strong{color:var(--gold)}
+@media (prefers-reduced-motion:no-preference){
+  .bar span{transition:width .25s ease}
+}
+
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+#calc{scroll-margin-top:72px}
+main#pb{display:grid; gap:56px; margin-bottom:64px; min-width:0}
+.sec{display:grid; gap:18px; min-width:0; align-content:start}
+.eyebrow{font:700 13px/1.2 var(--font-body); letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin:0}
+.eyebrow.warn{color:var(--gold)}
+.pbh{font:800 clamp(26px,6.6vw,42px)/1.08 var(--font-display); letter-spacing:-.02em; text-transform:none; color:var(--ink); margin:0; text-wrap:balance; max-width:24ch}
+.psub{margin:0; color:var(--muted); max-width:56ch}
+.cover{background:var(--accent); color:var(--accent-ink); border-radius:20px; padding:28px 22px; display:grid; gap:18px}
+.cover .eyebrow{color:var(--accent-ink); opacity:.85}
+.cover h1{font:800 clamp(38px,11vw,72px)/1.02 var(--font-display); letter-spacing:-.03em; margin:0; text-wrap:balance}
+.cover p{margin:0; max-width:46ch}
+.cover .meta{opacity:.8; font-size:14px}
+.btn{display:inline-flex; align-items:center; justify-self:start; background:var(--accent-ink); color:var(--accent); font-weight:700; padding:0 22px; min-height:46px; border-radius:999px; text-decoration:none}
+.cards{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.pcard{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px; min-width:0; display:grid; gap:8px; align-content:start}
+.pcard h3{font:700 20px/1.2 var(--font-display); margin:0}
+.pcard p{margin:0; color:var(--muted)}
+.pcard.hi{background:var(--accent); border-color:var(--accent)}
+.pcard.hi h3,.pcard.hi p{color:var(--accent-ink)}
+.pcard.asp{border:2px solid var(--gold)}
+.tag{justify-self:start; font:700 12px var(--font-body); letter-spacing:.04em; padding:3px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.asp .tag{background:var(--gold-soft); color:var(--gold)}
+.fig{font:800 clamp(28px,8vw,40px)/1.05 var(--font-display); letter-spacing:-.02em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.take{font:700 clamp(18px,4.6vw,22px)/1.3 var(--font-display); color:var(--accent); margin:0; max-width:40ch}
+.warnp{color:var(--gold); font-weight:600; margin:0}
+.goal{background:#0C1A16; color:#E9F1EE; border-radius:20px; padding:28px 22px; display:grid; gap:14px; border:1px solid var(--line)}
+.goal .eyebrow{color:#3FD0AE}
+.goal p{margin:0; max-width:46ch}
+.goal .gs{color:#A9C2B8}
+.gbig{font:800 clamp(40px,13vw,88px)/1 var(--font-display); letter-spacing:-.03em; color:#3FD0AE; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.tbl{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+.tbl table{min-width:440px; font-size:15px}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.rows{display:grid; gap:14px}
+.brow{display:grid; grid-template-columns:64px minmax(0,1fr); gap:4px 12px; align-items:center}
+.brow .yl{font-weight:600; color:var(--muted); font-size:14px}
+.brow .bv{grid-column:2; font:700 17px var(--font-display); font-variant-numeric:tabular-nums}
+.brow.wide{grid-template-columns:minmax(0,1fr)}
+.brow.wide .bv{grid-column:1}
+.brow.wide .yl{font-size:16px; color:var(--ink)}
+.track{height:22px; background:var(--line); border-radius:6px; overflow:hidden; display:flex}
+.track .own{background:var(--muted); height:100%}
+.track .grw{background:var(--accent); height:100%}
+.track .late{background:var(--gold); height:100%}
+.legendrow{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:14px; color:var(--muted)}
+.pnote{background:var(--accent-soft); border-radius:14px; padding:16px 18px; margin:0}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <span class="brand" data-i18n="brand"></span>
+    <div class="tools">
+      <div class="lang" role="group" aria-label="Currency">
+        <button type="button" id="btnRm" aria-pressed="true">RM</button>
+        <button type="button" id="btnUsd" aria-pressed="false">USD</button>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="btnEn" aria-pressed="true">EN</button>
+        <button type="button" id="btnMs" aria-pressed="false">BM</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="pb"></main>
+
+  <section id="calc" class="sec">
+  <p class="eyebrow" data-i18n="pb_next"></p>
+  <h2 id="h1" class="calc-h"></h2>
+  <p class="sub" data-i18n="sub"></p>
+
+  <div class="grid">
+    <section class="plan" aria-labelledby="planH">
+      <h2 id="planH" data-i18n="secInputs" style="margin:0"></h2>
+
+      <div class="field">
+        <div class="field-head">
+          <label id="lblPmt" for="pmtN" data-i18n="lblPmt"></label>
+          <span class="num"><span class="aff">RM</span><input id="pmtN" type="number" inputmode="numeric" min="500" max="10000" step="100"></span>
+        </div>
+        <input id="pmtR" type="range" min="500" max="10000" step="100" aria-labelledby="lblPmt">
+        <div class="chips" id="pmtChips"></div>
+        <div class="eq" id="eqPmt"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label id="lblRate" for="rateN" data-i18n="lblRate"></label>
+          <span class="num"><input id="rateN" type="number" inputmode="decimal" min="5" max="20" step="0.5"><span class="aff">%</span></span>
+        </div>
+        <input id="rateR" type="range" min="5" max="20" step="0.5" aria-labelledby="lblRate">
+        <div class="chips" id="rateChips"></div>
+        <div class="scen" id="scen" role="status"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label id="lblTarget" for="tgtN" data-i18n="lblTarget"></label>
+          <span class="num"><span class="aff">RM</span><input id="tgtN" type="number" inputmode="numeric" min="100000" max="3000000" step="50000"></span>
+        </div>
+        <input id="tgtR" type="range" min="100000" max="3000000" step="50000" aria-labelledby="lblTarget">
+        <div class="eq" id="eqTgt"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label id="lblStart" for="stN" data-i18n="lblStart"></label>
+          <span class="num"><span class="aff">RM</span><input id="stN" type="number" inputmode="numeric" min="0" max="500000" step="5000"></span>
+        </div>
+        <input id="stR" type="range" min="0" max="500000" step="5000" aria-labelledby="lblStart">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label id="lblFx" for="fxN" data-i18n="lblFx"></label>
+          <span class="num"><span class="aff">US$1 =</span><input id="fxN" type="number" inputmode="decimal" min="3" max="6" step="0.01"><span class="aff">RM</span></span>
+        </div>
+        <div class="eq" data-i18n="fxNote"></div>
+      </div>
+    </section>
+
+    <div class="results" aria-live="polite">
+      <section class="hero" id="hero"></section>
+
+      <section class="card" id="splitCard"></section>
+
+      <section class="card income" id="incomeCard"></section>
+
+      <section class="card" id="waitCard"></section>
+
+      <section class="card chartbox" id="chartCard"></section>
+
+      <section class="card" id="tableCard"></section>
+
+      <section class="disc"><strong data-i18n="discTitle"></strong> <span data-i18n="disc"></span></section>
+    </div>
+  </div>
+  </section>
+</div>
+
+<script>
+var I18N = {
+  en: {
+    brand: "CommonQuant · Portfolio playbook",
+    sub: "Choose what you can save each month. See how compounding gets you there.",
+    secInputs: "Your plan",
+    lblPmt: "Saved each month", lblRate: "Return per year", lblTarget: "Target portfolio", lblStart: "Already saved (optional)",
+    lblFx: "Exchange rate", fxNote: "Converts between RM and US dollars. Update it to today's rate.",
+    scenCons: "Conservative scenario.", scenMod: "Moderate scenario.",
+    scenAsp: "Aspirational scenario. Not a promise: returns this high can come with deep drawdowns.",
+    resLead: "You reach it in", resDone: "You already have this amount.",
+    resCapped: "More than 60 years at this saving rate. Try saving more or lowering the target.",
+    yr: "yr", yrs: "yrs", mth: "mth", mths: "mths", axisYr: "yr",
+    splitTitle: "Where the money comes from", splitIn: "Your own money", splitGrowth: "Compounding growth",
+    incomeTitle: "Once you are there", incomeLead: "At the same return, the portfolio could pay about",
+    perMonth: "a month", perYear: "a year",
+    incomeNote: "Paid from growth alone, so the principal stays. This only holds if the return holds.",
+    incomeReal: "In today's money (3% inflation): about {x} a month.",
+    waitTitle: "What waiting costs",
+    waitText: "Same {pmt} a month, same {Y} years. Start now, or start 5 years late:",
+    waitNow: "Start now", waitLate: "5 years late", waitGap: "Waiting gives up {gap}.",
+    chartTitle: "Growth over time", legendBal: "Portfolio", legendIn: "Your money in", legendTarget: "Target",
+    tableTitle: "Year by year", thYear: "Year", thIn: "Money in", thBal: "Balance", thGrowth: "Growth",
+    discTitle: "Important.",
+    disc: "Illustration only, not financial advice or a promise of returns. Assumes a fixed return compounded monthly, deposits at month end, and no fees, tax or inflation unless stated. Real returns vary and investments can lose value. Speak to a licensed adviser before investing. Switching currency changes how amounts are shown. It does not change the return assumption, and future exchange-rate moves are not modelled."
+  },
+  ms: {
+    brand: "CommonQuant · Playbook portfolio",
+    sub: "Pilih jumlah yang mampu anda simpan setiap bulan. Lihat bagaimana kompaun membawa anda ke sana.",
+    secInputs: "Pelan anda",
+    lblPmt: "Simpanan sebulan", lblRate: "Pulangan setahun", lblTarget: "Sasaran portfolio", lblStart: "Simpanan sedia ada (pilihan)",
+    lblFx: "Kadar tukaran", fxNote: "Menukar antara RM dan dolar AS. Kemas kini mengikut kadar hari ini.",
+    scenCons: "Senario berhemah.", scenMod: "Senario sederhana.",
+    scenAsp: "Senario aspirasi. Bukan janji: pulangan setinggi ini boleh disertai kejatuhan nilai yang besar.",
+    resLead: "Anda mencapainya dalam", resDone: "Anda sudah mempunyai jumlah ini.",
+    resCapped: "Lebih 60 tahun pada kadar simpanan ini. Cuba simpan lebih atau turunkan sasaran.",
+    yr: "thn", yrs: "thn", mth: "bln", mths: "bln", axisYr: "thn",
+    splitTitle: "Dari mana datangnya wang itu", splitIn: "Wang anda sendiri", splitGrowth: "Pertumbuhan kompaun",
+    incomeTitle: "Apabila anda sampai", incomeLead: "Pada pulangan yang sama, portfolio boleh membayar kira-kira",
+    perMonth: "sebulan", perYear: "setahun",
+    incomeNote: "Dibayar daripada pertumbuhan sahaja, jadi modal kekal. Ini hanya benar jika pulangan kekal.",
+    incomeReal: "Dalam nilai wang hari ini (inflasi 3%): kira-kira {x} sebulan.",
+    waitTitle: "Kos menunggu",
+    waitText: "{pmt} sebulan yang sama, tempoh {Y} tahun yang sama. Mula sekarang, atau mula 5 tahun lewat:",
+    waitNow: "Mula sekarang", waitLate: "Lewat 5 tahun", waitGap: "Menunggu bermakna kehilangan {gap}.",
+    chartTitle: "Pertumbuhan dari masa ke masa", legendBal: "Portfolio", legendIn: "Wang anda", legendTarget: "Sasaran",
+    tableTitle: "Tahun demi tahun", thYear: "Tahun", thIn: "Wang masuk", thBal: "Baki", thGrowth: "Pertumbuhan",
+    discTitle: "Penting.",
+    disc: "Ilustrasi sahaja, bukan nasihat kewangan atau janji pulangan. Andaian pulangan tetap dikompaun setiap bulan, simpanan di hujung bulan, dan tiada yuran, cukai atau inflasi kecuali dinyatakan. Pulangan sebenar berbeza dan pelaburan boleh mengalami kerugian. Dapatkan nasihat penasihat berlesen sebelum melabur. Menukar mata wang hanya mengubah paparan jumlah. Andaian pulangan tidak berubah dan pergerakan kadar tukaran pada masa depan tidak dimodelkan."
+  }
+};
+
+
+var PB = {
+  en: {
+    pb_next: "Your next step", pb_cta: "Try the calculator",
+    pb_coverTitle: "The {goal} Journey",
+    pb_coverSub: "Why you need a portfolio, what to aim for, and how long it takes on {A} to {B} a month.",
+    pb_coverMeta: "For Malaysian investors · October 2026",
+    pb_whyEy: "Why a portfolio", pb_whyH: "Your salary pays today's bills. A portfolio pays you later.",
+    pb_salary: "Salary", pb_salaryP: "Pays while you work. It stops when you stop.",
+    pb_cash: "Cash savings", pb_cashP: "Safe, but inflation slowly shrinks what it can buy.",
+    pb_port: "Portfolio", pb_portP: "Your money works every month, even while you sleep.",
+    pb_durian: "Think of a durian tree: plant it early and it bears fruit for decades.",
+    pb_goalEy: "The goal",
+    pb_goalP: "A portfolio this size can pay you every month while the principal stays put.",
+    pb_goalP2: "At a 20% return that is about {y20} a year. 20% is the aspirational case, so the sections ahead plan on 8% to 12% first.",
+    pb_equiv: "{T} is about {rm} at RM{fx} per US$1.",
+    pb_mathEy: "The maths", pb_compH: "Compounding does the heavy lifting",
+    pb_compSub: "{A} a month at 12% a year, invested at the end of each month",
+    pb_thMile: "Milestone", pb_thReach: "Reached after", pb_thPut: "You put in", pb_thAdded: "Compounding added",
+    pb_years: "years",
+    pb_half: "The first {half} takes {x} years. The second {half} takes {y} years.",
+    pb_timeH: "How long to reach {goal}", pb_timeSub: "Monthly deposits, return compounded monthly",
+    pb_thSaved: "Saved each month", pb_rateYr: "{r}% a year", pb_asp20: "20% aspirational",
+    pb_timeTake: "At 12%, saving {B} instead of {A} gets you there about {d} years sooner.",
+    pb_timeNote: "20% is a target to aim at, not a return to count on.",
+    pb_commitEy: "Your commitment", pb_commitH: "{A} a month for {Y} years",
+    pb_commitSub: "{put} of your own money becomes about {bal} at 12% a year.",
+    pb_yearN: "Year {n}",
+    pb_incomeH: "What {goal} can pay you",
+    pb_cons: "Conservative", pb_mod: "Moderate", pb_asp: "Aspirational",
+    pb_orYear: "a month, or {y} a year",
+    pb_incomeNote: "Paid from growth alone, so your principal stays invested. In today's money, {m} a month in {Y} years buys what about {real} buys now, at 3% inflation.",
+    pb_waitH: "Start 5 years late and you reach less than half",
+    pb_waitSub: "Same {A} a month, same 12% a year, measured at year {Y}",
+    pb_waitRes: "Waiting five years costs about {gap} at year {Y}.",
+    pb_cqEy: "How CommonQuant helps", pb_cqH: "A navigator, not an autopilot",
+    pb_cqSub: "You make the decisions. CommonQuant helps you make them with more information.",
+    pb_c1: "Find ideas", pb_c1p: "Browse market ideas and see the reasoning behind them.",
+    pb_c2: "Research before you buy", pb_c2p: "Look up a ticker and read the research on it.",
+    pb_c3: "Shape a strategy", pb_c3p: "Turn a thesis into a strategy you can review.",
+    pb_c4: "Stay on top of it", pb_c4p: "Set alerts, so you notice what matters without watching screens.",
+    pb_gEy: "Honest limits", pb_gH: "Read this before you plan",
+    pb_g1: "20% is a target", pb_g1p: "It is not a promise or a typical result. Plan on lower returns first.",
+    pb_g2: "Losses happen", pb_g2p: "Any strategy can fall in value, sometimes sharply, and some years are negative.",
+    pb_g3: "Prices rise over time", pb_g3p: "{m} a month in {Y} years buys less than it does today.",
+    pb_g4: "This is education", pb_g4p: "It is not financial advice. Speak to a licensed adviser before investing."
+  },
+  ms: {
+    pb_next: "Langkah seterusnya", pb_cta: "Cuba kalkulator",
+    pb_coverTitle: "Perjalanan {goal}",
+    pb_coverSub: "Mengapa anda perlukan portfolio, apa yang disasarkan, dan berapa lama masa yang diambil dengan simpanan {A} hingga {B} sebulan.",
+    pb_coverMeta: "Untuk pelabur Malaysia · Oktober 2026",
+    pb_whyEy: "Mengapa portfolio", pb_whyH: "Gaji anda membayar bil hari ini. Portfolio membayar anda kelak.",
+    pb_salary: "Gaji", pb_salaryP: "Dibayar semasa anda bekerja. Berhenti apabila anda berhenti.",
+    pb_cash: "Simpanan tunai", pb_cashP: "Selamat, tetapi inflasi perlahan-lahan mengurangkan nilai belian.",
+    pb_port: "Portfolio", pb_portP: "Wang anda bekerja setiap bulan, walaupun semasa anda tidur.",
+    pb_durian: "Fikirkan pokok durian: tanam awal dan ia berbuah selama beberapa dekad.",
+    pb_goalEy: "Matlamat",
+    pb_goalP: "Portfolio sebesar ini boleh membayar anda setiap bulan sementara modal kekal.",
+    pb_goalP2: "Pada pulangan 20%, itu kira-kira {y20} setahun. 20% ialah senario aspirasi, jadi bahagian seterusnya merancang pada 8% hingga 12% dahulu.",
+    pb_equiv: "{T} bersamaan kira-kira {rm} pada kadar RM{fx} bagi setiap US$1.",
+    pb_mathEy: "Pengiraan", pb_compH: "Kompaun melakukan kerja berat",
+    pb_compSub: "{A} sebulan pada 12% setahun, dilaburkan pada hujung setiap bulan",
+    pb_thMile: "Pencapaian", pb_thReach: "Dicapai selepas", pb_thPut: "Anda laburkan", pb_thAdded: "Kompaun menambah",
+    pb_years: "tahun",
+    pb_half: "{half} pertama mengambil masa {x} tahun. {half} kedua mengambil masa {y} tahun.",
+    pb_timeH: "Berapa lama untuk mencapai {goal}", pb_timeSub: "Simpanan bulanan, pulangan dikompaun setiap bulan",
+    pb_thSaved: "Simpanan sebulan", pb_rateYr: "{r}% setahun", pb_asp20: "20% aspirasi",
+    pb_timeTake: "Pada 12%, menyimpan {B} dan bukan {A} membawa anda ke sana kira-kira {d} tahun lebih awal.",
+    pb_timeNote: "20% ialah sasaran, bukan pulangan yang boleh diharap.",
+    pb_commitEy: "Komitmen anda", pb_commitH: "{A} sebulan selama {Y} tahun",
+    pb_commitSub: "{put} wang anda sendiri menjadi kira-kira {bal} pada 12% setahun.",
+    pb_yearN: "Tahun {n}",
+    pb_incomeH: "Apa yang boleh dibayar oleh {goal}",
+    pb_cons: "Berhemah", pb_mod: "Sederhana", pb_asp: "Aspirasi",
+    pb_orYear: "sebulan, atau {y} setahun",
+    pb_incomeNote: "Dibayar daripada pertumbuhan sahaja, jadi modal anda kekal dilaburkan. Dalam nilai wang hari ini, {m} sebulan dalam {Y} tahun membeli apa yang kira-kira {real} beli sekarang, pada inflasi 3%.",
+    pb_waitH: "Mula 5 tahun lewat dan anda mencapai kurang separuh",
+    pb_waitSub: "{A} sebulan yang sama, 12% setahun yang sama, diukur pada tahun {Y}",
+    pb_waitRes: "Menunggu lima tahun menyebabkan kehilangan kira-kira {gap} pada tahun {Y}.",
+    pb_cqEy: "Bagaimana CommonQuant membantu", pb_cqH: "Pemandu arah, bukan juruterbang automatik",
+    pb_cqSub: "Anda membuat keputusan. CommonQuant membantu anda membuatnya dengan lebih banyak maklumat.",
+    pb_c1: "Cari idea", pb_c1p: "Layari idea pasaran dan lihat sebab di sebaliknya.",
+    pb_c2: "Kaji sebelum membeli", pb_c2p: "Cari sesuatu simbol saham dan baca kajian mengenainya.",
+    pb_c3: "Bentuk strategi", pb_c3p: "Ubah tesis menjadi strategi yang boleh anda semak.",
+    pb_c4: "Sentiasa peka", pb_c4p: "Tetapkan makluman supaya anda tahu apa yang penting tanpa menatap skrin.",
+    pb_gEy: "Had yang jujur", pb_gH: "Baca ini sebelum anda merancang",
+    pb_g1: "20% ialah sasaran", pb_g1p: "Ia bukan janji atau hasil lazim. Rancang dengan pulangan yang lebih rendah dahulu.",
+    pb_g2: "Kerugian boleh berlaku", pb_g2p: "Mana-mana strategi boleh jatuh nilai, kadangkala dengan tajam, dan ada tahun yang negatif.",
+    pb_g3: "Harga naik dari semasa ke semasa", pb_g3p: "{m} sebulan dalam {Y} tahun membeli lebih sedikit berbanding hari ini.",
+    pb_g4: "Ini ialah pendidikan", pb_g4p: "Ini bukan nasihat kewangan. Dapatkan nasihat penasihat berlesen sebelum melabur."
+  }
+};
+['en', 'ms'].forEach(function(l){ for (var k in PB[l]) I18N[l][k] = PB[l][k]; });
+
+/* Playbook scenarios. USD is the RM scenario at a quarter of the size (about RM4 per US$1), so the timelines match. */
+var SCEN = {
+  RM:  { A: 2000, B: 3000, T: 1000000, sym: 'RM' },
+  USD: { A: 500,  B: 750,  T: 250000,  sym: 'US$' }
+};
+
+var lang = 'en';
+var S = { pmt: 2000, rate: 12, target: 1000000, start: 0 };
+var MAX_YEARS = 60;
+var INFLATION = 0.03;
+
+function $(id){ return document.getElementById(id); }
+function t(k){ return I18N[lang][k]; }
+function fill(s, o){ return s.replace(/\{(\w+)\}/g, function(_, k){ return o[k]; }); }
+var nf = new Intl.NumberFormat('en-MY', { maximumFractionDigits: 0 });
+var cur = 'RM';
+var FX = 4.08; /* RM per US$1, editable by the viewer */
+function cv(n){ return cur === 'USD' ? n / FX : n; }
+function fmtIn(n, c){ return (c === 'USD' ? 'US$' : 'RM') + nf.format(Math.round(c === 'USD' ? n / FX : n)); }
+function rm(n){ return fmtIn(n, cur); }
+function alt(n){ return fmtIn(n, cur === 'USD' ? 'RM' : 'USD'); }
+function short(n){
+  var p = cur === 'USD' ? 'US$' : 'RM', x = cv(n), v;
+  if (x >= 1e6){
+    v = +(x / 1e6).toFixed(2);
+    return p + v + (lang === 'ms' ? ' juta' : ' million');
+  }
+  v = +(x / 1e3).toFixed(0);
+  return p + v + (lang === 'ms' ? ' ribu' : 'k');
+}
+
+/* Pure maths: monthly compounding, deposits at month end. */
+function monthsToTarget(p0, pmt, ratePct, target){
+  var r = ratePct / 100 / 12;
+  if (p0 >= target) return 0;
+  var a = pmt / r;
+  var x = (target + a) / (p0 + a);
+  return Math.log(x) / Math.log(1 + r);
+}
+function balance(p0, pmt, ratePct, m){
+  var r = ratePct / 100 / 12;
+  var g = Math.pow(1 + r, m);
+  return p0 * g + pmt * (g - 1) / r;
+}
+function waitedBalance(p0, pmt, ratePct, H, delay){
+  var r = ratePct / 100 / 12;
+  var g = Math.pow(1 + r, H);
+  var gw = Math.pow(1 + r, Math.max(0, H - delay));
+  return p0 * g + pmt * (gw - 1) / r;
+}
+function axisStep(maxV){
+  var raw = maxV / 4;
+  var p = Math.pow(10, Math.floor(Math.log10(raw)));
+  var c = [1, 2, 2.5, 5, 10];
+  for (var i = 0; i < c.length; i++){ if (c[i] * p >= raw * 0.99) return c[i] * p; }
+  return 10 * p;
+}
+function axisLabel(v){
+  if (v >= 1e6) return (+(v / 1e6).toFixed(2)) + 'M';
+  if (v >= 1e3) return (+(v / 1e3).toFixed(0)) + 'k';
+  return '0';
+}
+
+function unitsHTML(y, m){
+  var out = '';
+  if (y > 0) out += '<span class="time">' + y + '</span><span class="unit">' + (y === 1 ? t('yr') : t('yrs')) + '</span>';
+  if (m > 0) out += '<span class="time">' + m + '</span><span class="unit">' + (m === 1 ? t('mth') : t('mths')) + '</span>';
+  return out;
+}
+
+function renderChart(rows, Y){
+  var W = 360, H = 216, L = 48, R = 12, T = 16, B = 28;
+  var pw = W - L - R, ph = H - T - B;
+  var maxV = cv(Math.max(rows[Y].b, S.target));
+  var step = axisStep(maxV);
+  var nT = Math.max(1, Math.ceil(maxV / step - 0.01));
+  var yMax = step * nT;
+  function X(y){ return L + pw * (y / Y); }
+  function Yp(v){ return T + ph * (1 - Math.min(v, yMax) / yMax); }
+  var g = '';
+  for (var i = 0; i <= nT; i++){
+    var v = step * i, y = Yp(v);
+    g += '<line class="grid-l" x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
+    g += '<text class="tick" x="' + (L - 6) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end">' + axisLabel(v) + '</text>';
+  }
+  var xs = [0, Math.round(Y / 2), Y].filter(function(v, i, a){ return a.indexOf(v) === i; });
+  xs.forEach(function(y){
+    g += '<text class="tick" x="' + X(y).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (y === 0 ? 'start' : y === Y ? 'end' : 'middle') + '">' + y + (y === Y ? ' ' + t('axisYr') : '') + '</text>';
+  });
+  var pb = rows.map(function(r){ return X(r.y).toFixed(1) + ',' + Yp(cv(r.b)).toFixed(1); }).join(' ');
+  var pi = rows.map(function(r){ return X(r.y).toFixed(1) + ',' + Yp(cv(r.i)).toFixed(1); }).join(' ');
+  var area = 'M' + X(0).toFixed(1) + ',' + Yp(0).toFixed(1) + ' L' + pb.replace(/ /g, ' L') + ' L' + X(Y).toFixed(1) + ',' + Yp(0).toFixed(1) + ' Z';
+  var ty = Yp(cv(S.target));
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + t('chartTitle') + '">' + g +
+    '<path class="a-bal" d="' + area + '"/>' +
+    '<line class="l-tg" x1="' + L + '" x2="' + (W - R) + '" y1="' + ty.toFixed(1) + '" y2="' + ty.toFixed(1) + '"/>' +
+    '<text class="t-tg" x="' + (L + 4) + '" y="' + (ty - 5).toFixed(1) + '">' + t('legendTarget') + ' ' + short(S.target) + '</text>' +
+    '<polyline class="l-in" points="' + pi + '"/>' +
+    '<polyline class="l-bal" points="' + pb + '"/>' +
+    '</svg>';
+  return '<h2>' + t('chartTitle') + '</h2>' + svg +
+    '<div class="key"><span><i style="border-color:var(--accent)"></i>' + t('legendBal') + '</span>' +
+    '<span><i style="border-color:var(--muted);border-top-style:dashed"></i>' + t('legendIn') + '</span>' +
+    '<span><i style="border-color:var(--gold);border-top-style:dotted"></i>' + t('legendTarget') + '</span></div>';
+}
+
+function render(){
+  $('h1').textContent = lang === 'ms' ? 'Berapa lama untuk capai ' + short(S.target) + '?' : 'How long to reach ' + short(S.target) + '?';
+
+  $('eqPmt').textContent = '≈ ' + alt(S.pmt) + ' ' + t('perMonth');
+  $('eqTgt').textContent = '≈ ' + alt(S.target);
+
+  /* chips */
+  var PMT_CHIPS = cur === 'USD' ? [500, 600, 700] : [2000, 2500, 3000];
+  [['pmtChips', 'pmt', PMT_CHIPS, function(v){ return (cur === 'USD' ? 'US$' : 'RM') + nf.format(v); }],
+   ['rateChips', 'rate', [8, 12, 20], function(v){ return v + '%'; }]].forEach(function(c){
+    var box = $(c[0]);
+    if (box.dataset.cur !== cur){
+      box.innerHTML = '';
+      box.dataset.cur = cur;
+      c[2].forEach(function(v){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.dataset.v = v; b.textContent = c[3](v);
+        b.addEventListener('click', function(){ setValue(c[1], c[1] === 'pmt' ? fromDisp('pmt', v) : v); });
+        box.appendChild(b);
+      });
+    }
+    Array.prototype.forEach.call(box.children, function(b){
+      var now = c[1] === 'pmt' ? Math.round(cv(S.pmt)) : S[c[1]];
+      b.setAttribute('aria-pressed', String(Number(b.dataset.v) === now));
+    });
+  });
+
+  var sc = $('scen');
+  if (S.rate > 12){ sc.className = 'scen asp'; sc.textContent = t('scenAsp'); }
+  else if (S.rate > 8){ sc.className = 'scen'; sc.textContent = t('scenMod'); }
+  else { sc.className = 'scen'; sc.textContent = t('scenCons'); }
+
+  var n = monthsToTarget(S.start, S.pmt, S.rate, S.target);
+  var capped = n > MAX_YEARS * 12;
+  var m = capped ? MAX_YEARS * 12 : Math.ceil(n - 1e-9);
+  var y = Math.floor(m / 12), mo = m % 12;
+  var Y = capped ? MAX_YEARS : Math.max(1, Math.ceil(m / 12));
+
+  /* hero */
+  var hero;
+  if (capped){
+    hero = '<p class="lead">' + t('resLead') + '</p><div><span class="time">60+</span><span class="unit">' + t('yrs') + '</span></div><p class="note">' + t('resCapped') + '</p>';
+  } else if (m === 0){
+    hero = '<p class="lead">' + t('resDone') + '</p>';
+  } else {
+    hero = '<p class="lead">' + t('resLead') + '</p><div>' + unitsHTML(y, mo) + '</div>';
+  }
+  $('hero').innerHTML = hero;
+
+  /* split */
+  var endM = capped ? MAX_YEARS * 12 : m;
+  var bal = balance(S.start, S.pmt, S.rate, endM);
+  var put = S.start + S.pmt * endM;
+  var growth = Math.max(0, bal - put);
+  var pIn = bal > 0 ? Math.round(put / bal * 100) : 0;
+  var pGr = 100 - pIn;
+  $('splitCard').innerHTML = '<h2>' + t('splitTitle') + '</h2>' +
+    '<div class="bar" role="img" aria-label="' + pIn + '% / ' + pGr + '%"><span class="in" style="width:' + pIn + '%"></span><span class="gr" style="width:' + pGr + '%"></span></div>' +
+    '<div class="legend">' +
+    '<div><div class="k"><i class="dot" style="background:var(--muted)"></i>' + t('splitIn') + '</div><div class="v">' + rm(put) + '</div><div class="p">' + pIn + '%</div></div>' +
+    '<div><div class="k"><i class="dot" style="background:var(--accent)"></i>' + t('splitGrowth') + '</div><div class="v">' + rm(growth) + '</div><div class="p">' + pGr + '%</div></div>' +
+    '</div>';
+
+  /* income */
+  var yearly = S.target * S.rate / 100;
+  var monthly = yearly / 12;
+  var real = monthly / Math.pow(1 + INFLATION, endM / 12);
+  $('incomeCard').innerHTML = '<h2>' + t('incomeTitle') + '</h2>' +
+    '<p class="muted" style="margin:0 0 6px">' + t('incomeLead') + '</p>' +
+    '<div class="big">' + rm(monthly) + ' <small>' + t('perMonth') + '</small></div>' +
+    '<div class="eq">≈ ' + alt(monthly) + ' ' + t('perMonth') + '</div>' +
+    '<p class="muted">' + rm(yearly) + ' ' + t('perYear') + '. ' + t('incomeNote') + '</p>' +
+    (capped ? '' : '<p class="muted">' + fill(t('incomeReal'), { x: rm(real) }) + '</p>');
+
+  /* wait */
+  var wc = $('waitCard');
+  if (!capped && m > 0){
+    var H = Y * 12;
+    var A = balance(S.start, S.pmt, S.rate, H);
+    var Bv = waitedBalance(S.start, S.pmt, S.rate, H, 60);
+    wc.hidden = false;
+    wc.innerHTML = '<h2>' + t('waitTitle') + '</h2>' +
+      '<p class="muted" style="margin:0">' + fill(t('waitText'), { pmt: rm(S.pmt), Y: Y }) + '</p>' +
+      '<div class="pair"><div><div class="k">' + t('waitNow') + '</div><div class="v">' + rm(A) + '</div></div>' +
+      '<div class="late"><div class="k">' + t('waitLate') + '</div><div class="v">' + rm(Bv) + '</div></div></div>' +
+      '<p class="gap">' + fill(t('waitGap'), { gap: rm(A - Bv) }) + '</p>';
+  } else { wc.hidden = true; wc.innerHTML = ''; }
+
+  /* chart + table */
+  var rows = [];
+  for (var i = 0; i <= Y; i++){
+    var mm = i * 12;
+    rows.push({ y: i, b: balance(S.start, S.pmt, S.rate, mm), i: S.start + S.pmt * mm });
+  }
+  $('chartCard').innerHTML = renderChart(rows, Y);
+
+  var body = '', hitDone = false;
+  for (var k = 1; k <= Y; k++){
+    var r = rows[k];
+    var hit = !hitDone && r.b >= S.target;
+    if (hit) hitDone = true;
+    body += '<tr' + (hit ? ' class="hit"' : '') + '><td>' + k + '</td><td>' + rm(r.i) + '</td><td>' + rm(r.b) + '</td><td>' + rm(Math.max(0, r.b - r.i)) + '</td></tr>';
+  }
+  $('tableCard').innerHTML = '<h2>' + t('tableTitle') + '</h2><div class="tablewrap" tabindex="0"><table><thead><tr><th>' + t('thYear') + '</th><th>' + t('thIn') + '</th><th>' + t('thBal') + '</th><th>' + t('thGrowth') + '</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+
+function goalWord(title){
+  if (cur === 'USD') return 'US$' + nf.format(SCEN.USD.T);
+  if (lang === 'ms') return title ? 'RM1 Juta' : 'RM1 juta';
+  return title ? 'RM1 Million' : 'RM1 million';
+}
+
+function renderPlaybook(){
+  var sc = SCEN[cur], A = sc.A, B = sc.B, T = sc.T, sym = sc.sym;
+  function f(n){ return sym + nf.format(Math.round(n)); }
+  var step = T / 1000;
+  function fr(n){ return f(Math.round(n / step) * step); }
+  function yrs(m){ return (m / 12).toFixed(1); }
+  function H(x){ return '<h2 class="pbh">' + x + '</h2>'; }
+  function eb(k, warn){ return '<p class="eyebrow' + (warn ? ' warn' : '') + '">' + t(k) + '</p>'; }
+  function card(h, p, cls){ return '<div class="pcard ' + (cls || '') + '"><h3>' + h + '</h3><p>' + p + '</p></div>'; }
+
+  var m12 = monthsToTarget(0, A, 12, T);
+  var Y = Math.round(m12 / 12);
+  var goalLow = goalWord(false), goalTitle = goalWord(true);
+  var monthly12 = T * 12 / 100 / 12;
+  var real = Math.round(monthly12 / Math.pow(1 + INFLATION, Y) / 100) * 100;
+  var out = '';
+
+  /* cover */
+  out += '<section class="cover"><p class="eyebrow">' + t('brand') + '</p><h1>' + fill(t('pb_coverTitle'), { goal: goalTitle }) + '</h1>' +
+    '<p>' + fill(t('pb_coverSub'), { A: f(A), B: f(B) }) + '</p><p class="meta">' + t('pb_coverMeta') + '</p>' +
+    '<a class="btn" href="#calc">' + t('pb_cta') + '</a></section>';
+
+  /* why */
+  out += '<section class="sec">' + eb('pb_whyEy') + H(t('pb_whyH')) + '<div class="cards">' +
+    card(t('pb_salary'), t('pb_salaryP')) + card(t('pb_cash'), t('pb_cashP')) + card(t('pb_port'), t('pb_portP'), 'hi') +
+    '</div><p class="take">' + t('pb_durian') + '</p></section>';
+
+  /* goal */
+  out += '<section class="goal"><p class="eyebrow">' + t('pb_goalEy') + '</p><div class="gbig">' + f(T) + '</div>' +
+    '<p>' + t('pb_goalP') + '</p><p class="gs">' + fill(t('pb_goalP2'), { y20: f(T * 0.2) }) + '</p>';
+  if (cur === 'USD'){
+    out += '<p class="gs">' + fill(t('pb_equiv'), { T: f(T), rm: 'RM' + nf.format(Math.round(T * FX / 1000) * 1000), fx: FX.toFixed(2) }) + '</p>';
+  }
+  out += '</section>';
+
+  /* compounding milestones */
+  var fracs = [0.1, 0.25, 0.5, 1], rows = '';
+  fracs.forEach(function(q, i){
+    var tgt = T * q, m = monthsToTarget(0, A, 12, tgt);
+    rows += '<tr' + (i === 3 ? ' class="hit"' : '') + '><td>' + f(tgt) + '</td><td>' + yrs(m) + ' ' + t('pb_years') + '</td><td>' + fr(A * m) + '</td><td>' + fr(tgt - A * m) + '</td></tr>';
+  });
+  var half = monthsToTarget(0, A, 12, T / 2);
+  out += '<section class="sec">' + eb('pb_mathEy') + H(t('pb_compH')) + '<p class="psub">' + fill(t('pb_compSub'), { A: f(A) }) + '</p>' +
+    '<div class="tbl"><table><thead><tr><th>' + t('pb_thMile') + '</th><th>' + t('pb_thReach') + '</th><th>' + t('pb_thPut') + '</th><th>' + t('pb_thAdded') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<p class="take">' + fill(t('pb_half'), { half: f(T / 2), x: yrs(half), y: yrs(m12 - half) }) + '</p></section>';
+
+  /* time to goal */
+  var trs = '';
+  [A, B].forEach(function(P, i){
+    trs += '<tr' + (i === 1 ? ' class="hit"' : '') + '><td><b>' + f(P) + '</b></td>';
+    [8, 12, 20].forEach(function(r){ trs += '<td>' + yrs(monthsToTarget(0, P, r, T)) + ' ' + t('pb_years') + '</td>'; });
+    trs += '</tr>';
+  });
+  var diff = ((m12 - monthsToTarget(0, B, 12, T)) / 12).toFixed(1);
+  out += '<section class="sec">' + eb('pb_mathEy') + H(fill(t('pb_timeH'), { goal: goalLow })) + '<p class="psub">' + t('pb_timeSub') + '</p>' +
+    '<div class="tbl"><table><thead><tr><th>' + t('pb_thSaved') + '</th><th>' + fill(t('pb_rateYr'), { r: 8 }) + '</th><th>' + fill(t('pb_rateYr'), { r: 12 }) + '</th><th>' + t('pb_asp20') + '</th></tr></thead><tbody>' + trs + '</tbody></table></div>' +
+    '<p class="take">' + fill(t('pb_timeTake'), { A: f(A), B: f(B), d: diff }) + '</p><p class="warnp">' + t('pb_timeNote') + '</p></section>';
+
+  /* commitment */
+  var list = [1, 3, 5, 10, Y], maxBal = balance(0, A, 12, Y * 12), brows = '';
+  list.forEach(function(yy){
+    var bal = balance(0, A, 12, yy * 12), put = A * 12 * yy;
+    brows += '<div class="brow"><span class="yl">' + fill(t('pb_yearN'), { n: yy }) + '</span><div class="track"><span class="own" style="width:' + (put / maxBal * 100).toFixed(1) + '%"></span><span class="grw" style="width:' + ((bal - put) / maxBal * 100).toFixed(1) + '%"></span></div><span class="bv">' + f(bal) + '</span></div>';
+  });
+  out += '<section class="sec">' + eb('pb_commitEy') + H(fill(t('pb_commitH'), { A: f(A), Y: Y })) +
+    '<p class="psub">' + fill(t('pb_commitSub'), { put: fr(A * 12 * Y), bal: fr(maxBal) }) + '</p>' +
+    '<div class="rows">' + brows + '</div>' +
+    '<div class="legendrow"><span><i class="dot" style="background:var(--muted)"></i>' + t('splitIn') + '</span><span><i class="dot" style="background:var(--accent)"></i>' + t('splitGrowth') + '</span></div></section>';
+
+  /* income */
+  var icards = '';
+  [[8, 'pb_cons', ''], [12, 'pb_mod', ''], [20, 'pb_asp', 'asp']].forEach(function(c){
+    icards += '<div class="pcard ' + c[2] + '"><span class="tag">' + t(c[1]) + '</span><h3>' + fill(t('pb_rateYr'), { r: c[0] }) + '</h3><div class="fig">' + f(T * c[0] / 1200) + '</div><p>' + fill(t('pb_orYear'), { y: f(T * c[0] / 100) }) + '</p></div>';
+  });
+  out += '<section class="sec">' + eb('incomeTitle') + H(fill(t('pb_incomeH'), { goal: goalLow })) + '<div class="cards">' + icards + '</div>' +
+    '<p class="pnote">' + fill(t('pb_incomeNote'), { m: f(monthly12), Y: Y, real: f(real) }) + '</p></section>';
+
+  /* cost of waiting */
+  var now = balance(0, A, 12, Y * 12), late = waitedBalance(0, A, 12, Y * 12, 60);
+  out += '<section class="sec">' + eb('waitTitle') + H(t('pb_waitH')) + '<p class="psub">' + fill(t('pb_waitSub'), { A: f(A), Y: Y }) + '</p>' +
+    '<div class="rows">' +
+    '<div class="brow wide"><span class="yl">' + t('waitNow') + '</span><div class="track"><span class="grw" style="width:100%"></span></div><span class="bv">' + f(now) + '</span></div>' +
+    '<div class="brow wide"><span class="yl">' + t('waitLate') + '</span><div class="track"><span class="late" style="width:' + (late / now * 100).toFixed(1) + '%"></span></div><span class="bv">' + f(late) + '</span></div>' +
+    '</div><p class="take">' + fill(t('pb_waitRes'), { gap: fr(now - late), Y: Y }) + '</p></section>';
+
+  /* CommonQuant */
+  out += '<section class="sec">' + eb('pb_cqEy') + H(t('pb_cqH')) + '<p class="psub">' + t('pb_cqSub') + '</p><div class="cards">' +
+    card(t('pb_c1'), t('pb_c1p')) + card(t('pb_c2'), t('pb_c2p')) + card(t('pb_c3'), t('pb_c3p')) + card(t('pb_c4'), t('pb_c4p')) + '</div></section>';
+
+  /* honest limits */
+  out += '<section class="sec">' + eb('pb_gEy', true) + H(t('pb_gH')) + '<div class="cards">' +
+    card(t('pb_g1'), t('pb_g1p'), 'asp') + card(t('pb_g2'), t('pb_g2p'), 'asp') +
+    card(t('pb_g3'), fill(t('pb_g3p'), { m: f(monthly12), Y: Y }), 'asp') + card(t('pb_g4'), t('pb_g4p'), 'asp') + '</div></section>';
+
+  $('pb').innerHTML = out;
+}
+
+function applyLang(){
+  document.documentElement.lang = lang === 'ms' ? 'ms' : 'en';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+  $('btnEn').setAttribute('aria-pressed', String(lang === 'en'));
+  $('btnMs').setAttribute('aria-pressed', String(lang === 'ms'));
+  render();
+  renderPlaybook();
+}
+
+var FIELDS = {
+  pmt:    { n: 'pmtN',  r: 'pmtR',  min: 500,    max: 10000 },
+  rate:   { n: 'rateN', r: 'rateR', min: 5,      max: 20 },
+  target: { n: 'tgtN',  r: 'tgtR',  min: 100000, max: 3000000 },
+  start:  { n: 'stN',   r: 'stR',   min: 0,      max: 500000 }
+};
+function clamp(k, v){ return Math.min(FIELDS[k].max, Math.max(FIELDS[k].min, v)); }
+function setValue(k, v){
+  S[k] = clamp(k, Number(v));
+  $(FIELDS[k].n).value = disp(k);
+  $(FIELDS[k].r).value = S[k];
+  render();
+}
+Object.keys(FIELDS).forEach(function(k){
+  var f = FIELDS[k], n = $(f.n), r = $(f.r);
+  n.value = disp(k); r.value = S[k];
+  r.addEventListener('input', function(){ S[k] = clamp(k, Number(r.value)); n.value = disp(k); render(); });
+  n.addEventListener('input', function(){
+    if (n.value === '') return;
+    var v = Number(n.value);
+    if (!isFinite(v)) return;
+    S[k] = clamp(k, fromDisp(k, v)); r.value = S[k]; render();
+  });
+  n.addEventListener('change', function(){ n.value = disp(k); });
+});
+
+function isMoney(k){ return k !== 'rate'; }
+function disp(k){ return isMoney(k) ? Math.round(cv(S[k])) : S[k]; }
+function fromDisp(k, v){ return isMoney(k) && cur === 'USD' ? v * FX : v; }
+function applyCur(){
+  var usd = cur === 'USD';
+  $('btnRm').setAttribute('aria-pressed', String(!usd));
+  $('btnUsd').setAttribute('aria-pressed', String(usd));
+  var sym = usd ? 'US$' : 'RM';
+  ['pmtN', 'tgtN', 'stN'].forEach(function(id){ $(id).previousElementSibling.textContent = sym; });
+  ['pmt', 'target', 'start'].forEach(function(k){
+    var f = FIELDS[k], n = $(f.n);
+    n.min = Math.ceil(cv(f.min)); n.max = Math.floor(cv(f.max)); n.step = 1;
+    n.value = disp(k);
+  });
+}
+function setCur(c){
+  if (c === cur) return;
+  var toUsd = c === 'USD';
+  var steps = { pmt: [100, 50], target: [50000, 10000], start: [5000, 1000] };
+  ['pmt', 'target', 'start'].forEach(function(k){
+    var stp = steps[k][toUsd ? 1 : 0];
+    var d = toUsd ? S[k] / FX : S[k];
+    d = Math.round(d / stp) * stp;
+    S[k] = clamp(k, toUsd ? d * FX : d);
+    $(FIELDS[k].r).value = S[k];
+  });
+  cur = c;
+  try { localStorage.setItem('rm1m-cur', c); } catch (e) {}
+  applyCur();
+  render();
+  renderPlaybook();
+}
+$('btnRm').addEventListener('click', function(){ setCur('RM'); });
+$('btnUsd').addEventListener('click', function(){ setCur('USD'); });
+
+var fxN = $('fxN');
+fxN.value = FX;
+fxN.addEventListener('input', function(){
+  var v = Number(fxN.value);
+  if (!isFinite(v) || v < 3 || v > 6) return;
+  var keep = {};
+  ['pmt', 'target', 'start'].forEach(function(k){ keep[k] = S[k] / FX; });
+  FX = v;
+  if (cur === 'USD'){
+    ['pmt', 'target', 'start'].forEach(function(k){ S[k] = clamp(k, keep[k] * FX); $(FIELDS[k].r).value = S[k]; });
+  }
+  render();
+  renderPlaybook();
+});
+fxN.addEventListener('change', function(){ fxN.value = FX; });
+
+$('btnEn').addEventListener('click', function(){ lang = 'en'; try { localStorage.setItem('rm1m-lang', lang); } catch (e) {} applyLang(); });
+$('btnMs').addEventListener('click', function(){ lang = 'ms'; try { localStorage.setItem('rm1m-lang', lang); } catch (e) {} applyLang(); });
+
+(function init(){
+  try {
+    var saved = localStorage.getItem('rm1m-lang');
+    var sc = localStorage.getItem('rm1m-cur');
+    if (sc === 'USD' || sc === 'RM') cur = sc;
+    if (saved === 'ms' || saved === 'en') lang = saved;
+    else if ((navigator.language || '').toLowerCase().indexOf('ms') === 0) lang = 'ms';
+  } catch (e) {}
+  if (cur === 'USD'){ cur = 'RM'; setCur('USD'); }
+  applyCur();
+  applyLang();
+})();
+</script>
+
+</html>
